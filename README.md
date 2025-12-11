@@ -332,6 +332,66 @@ curl http://127.0.0.1:5000/history
 
 ---
 
+# **10. Bonus Features Implemented**
+
+#### **1. Node.js Execution (JavaScript Support)**
+
+* Added support for executing JavaScript code using **Node.js**.
+* `/run` endpoint now accepts:
+
+  ```json
+  { "language": "javascript", "code": "console.log(10+20)" }
+  ```
+* Uses `node:20-slim` Docker image.
+* Runs code with:
+
+  ```
+  node /app/script.js
+  ```
+* Same security flags as Python (timeout, memory limit, no network, read-only FS).
+
+---
+
+#### **2. UI Improvements**
+
+* Added **language selector** (Python / NodeJS).
+* Cleaner UI styling for better readability.
+* Output box redesigned.
+* Added **History panel** (fetches data from `/history`).
+* Added optional **“Run as Node”** behavior triggered by language selection.
+
+---
+
+#### **3. Syntax Highlighting**
+
+* Integrated **Prism.js** for syntax-highlighted preview.
+* Editor remains a `<textarea>` for simplicity.
+* Output preview now visually grouped and styled.
+
+---
+
+#### **4. Execution History**
+
+* Stores last **10 runs** in `history.json`.
+* Each entry includes:
+
+  * language
+  * timestamp
+  * truncated code (first 100 chars)
+  * output
+  * error
+  * exit_code
+* History visible in UI sidebar and via API:
+
+  ```
+  GET /history
+  ```
+
+---
+
+
+
+
 #  Security Features Implemented
 
 * Timeout (10 seconds)
@@ -343,6 +403,130 @@ curl http://127.0.0.1:5000/history
 * Isolated Docker container per run
 
 ---
+# **11. Required Demonstration Tests**
+
+---
+
+## **Phase 1 — Normal Code Tests**
+
+| Test                                  | Expected Result    |
+| ------------------------------------- | ------------------ |
+| `print("Hello")`                      | Prints “Hello”     |
+| `x = 5 + 3; print(x)`                 | Prints `8`         |
+| Loops (`for i in range(5): print(i)`) | Works normally     |
+| JS: `console.log("Hello")`            | Works with Node.js |
+
+---
+
+## **Phase 2 — Security Tests**
+
+### **1. Infinite Loop → Timeout**
+
+```python
+while True: pass
+```
+
+**Expected:**
+
+```
+Execution timed out after 10 seconds.
+exit_code: -2
+```
+
+---
+
+### **2. Memory Bomb → OOM Kill**
+
+```python
+x = "a" * 1000000000
+```
+
+**Expected:**
+
+```
+exit_code: 137   (killed due to memory limit)
+```
+
+---
+
+### **3. Network Request → Blocked**
+
+```python
+import urllib.request
+urllib.request.urlopen("https://google.com")
+```
+
+**Expected:**
+Network failure. DNS resolution error. No internet allowed.
+
+---
+
+### **4. Write File → Blocked (Read-Only FS)**
+
+```python
+open("/tmp/hack.txt", "w").write("hello")
+```
+
+**Expected:**
+
+```
+OSError: [Errno 30] Read-only file system
+```
+
+---
+
+### **5. Long Code (>5000 chars) → Rejected**
+
+When sending more than 5000 characters of code:
+
+**Expected:**
+
+```json
+{ "error": "Code too long. Maximum allowed length is 5000 characters." }
+```
+
+---
+
+## **Phase 3 — Docker Security Experiments**
+
+### **1. Read `/etc/passwd` (Allowed in container)**
+
+```python
+print(open("/etc/passwd").read())
+```
+
+**Expected:**
+Container’s internal `/etc/passwd` is printed — safe.
+
+---
+
+### **2. Write Before `--read-only`**
+
+Before enabling read-only, writing succeeded.
+After enabling:
+
+```python
+open("/app/script.py", "w").write("hack")
+```
+
+**Expected:**
+
+```
+OSError: [Errno 30] Read-only file system
+```
+
+---
+
+### **3. Verify Isolation**
+
+* Container cannot access host files.
+* Only sees container’s filesystem.
+
+---
+
+
+
+
 
 #  What I Learned
 
@@ -372,4 +556,6 @@ curl http://127.0.0.1:5000/history
 * Simple, practical developer tool
 
 ---
+
+
 
