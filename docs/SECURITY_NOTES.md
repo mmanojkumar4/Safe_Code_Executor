@@ -1,6 +1,6 @@
 
 
-# Security Notes — Safe Code Executor Project
+# Security Notes — Safe Code Executor 
 
 ---
 ## 1. Filesystem Isolation
