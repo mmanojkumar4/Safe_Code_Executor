@@ -522,6 +522,8 @@ print(open("/etc/passwd").read())
 **Expected:**
 Container’s internal `/etc/passwd` is printed — safe.
 
+
+![javascript](app/outputs/etc.png)
 ---
 
 ### **2. Write Before `--read-only`**
