@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Safe Code Executor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 800px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: Consolas, monospace;
+            resize: vertical;
+            background: #fafafa;
+        }
+
+        select {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+
+        .buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 12px;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            color: white;
+        }
+
+        #runBtn {
+            background-color: #4CAF50;
+        }
+
+        #clearBtn {
+            background-color: #f44336;
+        }
+
+        .output-box {
+            margin-top: 20px;
+            padding: 12px;
+            background: #1e1e1e;
+            color: #00ff62;
+            border-radius: 8px;
+            height: 180px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: Consolas, monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Safe Code Executor</h2>
+
+    <label>Write your code:</label>
+    <textarea id="code" placeholder="print('Hello')"></textarea>
+
+    <br>
+
+    <label>Select language:</label>
+    <select id="language">
+        <option value="python">Python</option>
+        <option value="javascript">JavaScript</option>
+    </select>
+
+    <div class="buttons">
+        <button id="runBtn">Run</button>
+        <button id="clearBtn">Clear</button>
+    </div>
+
+    <h3>Output:</h3>
+    <div id="output" class="output-box"></div>
+</div>
+
+<script>
+    document.getElementById("runBtn").onclick = async () => {
+        const code = document.getElementById("code").value;
+        const lang = document.getElementById("language").value;
+
+        const response = await fetch("/run", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({language: lang, code: code})
+        });
+
+        const result = await response.json();
+
+        const outputBox = document.getElementById("output");
+
+        if (result.output) {
+            outputBox.innerText = result.output;
+        } else {
+            outputBox.innerText = "Error:\n" + result.error;
+        }
+    };
+
+    document.getElementById("clearBtn").onclick = () => {
+        document.getElementById("code").value = "";
+        document.getElementById("output").innerText = "";
+    };
+</script>
+
+</body>
+</html>
