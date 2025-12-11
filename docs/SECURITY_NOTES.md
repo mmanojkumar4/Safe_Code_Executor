@@ -1,11 +1,8 @@
 
-````markdown
+
 # Security Notes — Safe Code Executor Project
 
-This document summarizes what I learned about Docker security while building a safe Python code execution sandbox.
-
 ---
-
 ## 1. Filesystem Isolation
 
 ### Test
@@ -141,6 +138,6 @@ Execution timed out after 10 seconds.
 * With added limits (timeout, memory, read-only, no network), it becomes a safe sandbox.
 * Docker alone is not a complete security boundary, but proper configuration makes it suitable for controlled code execution.
 
-```
+
 
 
