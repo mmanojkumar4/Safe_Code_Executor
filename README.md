@@ -1,4 +1,3 @@
-<img width="1553" height="337" alt="etc" src="https://github.com/user-attachments/assets/5e700d29-7121-4e16-8c05-391602a79855" />
 # Safe Code Executor
 
 A secure Flask + Docker–based sandbox that runs **Python** and **JavaScript** code safely in isolated containers.
@@ -88,7 +87,9 @@ Safe_Code_Executor/
 
 * Stores last 10 runs in `history.json`
 * Accessible via `/history`
+---
 
+ ### Architecture
 ![all](app/outputs/arch.png)
 
 
@@ -117,7 +118,7 @@ Safe_Code_Executor/
 
 ---
 
-#  Getting Started (Step-by-Step)
+#  Getting Started 
 
 ---
 
@@ -343,7 +344,8 @@ Get last 10 executions:
 ```bash
 curl http://127.0.0.1:5000/history
 ```
-
+ 
+![javascript](app/outputs/history.png)
 ---
 
 # **10. Bonus Features Implemented**
