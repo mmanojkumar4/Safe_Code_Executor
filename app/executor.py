@@ -6,7 +6,7 @@ import shutil
 def run_code_in_docker(language, code):
     
 
-    # 1️⃣ Create temp directory + code file
+    #  Create temp directory + code file
     temp_dir = tempfile.mkdtemp()
 
     if language == "python":
@@ -32,7 +32,7 @@ def run_code_in_docker(language, code):
     with open(script_path, "w") as f:
         f.write(code)
 
-    # 2️⃣ Docker run command with full sandboxing
+    #  Docker run command with full sandboxing
     command = [
         "docker", "run", "--rm",
 
@@ -49,7 +49,7 @@ def run_code_in_docker(language, code):
     ] + run_cmd
 
     try:
-        # 3️⃣ Execute inside Docker with timeout
+        #  Execute inside Docker with timeout
         result = subprocess.run(
             command,
             capture_output=True,
