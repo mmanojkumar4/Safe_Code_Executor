@@ -271,7 +271,7 @@ Expected:
 ```json
 {"error":"","exit_code":137}
 ```
-![all](app/outputs/memorylimit.png)
+![all](app/outputs/memory limit.png)
 
 ---
 
