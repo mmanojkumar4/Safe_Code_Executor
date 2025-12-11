@@ -5,7 +5,7 @@ A secure Flask + Docker–based sandbox that runs **Python** and **JavaScript** 
 Safe Code Executor is a secure sandbox system that runs untrusted Python and JavaScript code inside isolated Docker containers.
 It enforces strict security controls—timeout, memory limits, no network, and read-only filesystem—to ensure safe execution. Includes a simple web UI and execution history.
 
-This guide shows **exactly how to run the project**, with **step-by-step instructions**, **command examples**, and **expected output** for every step.
+
 
 ---
 
@@ -90,6 +90,7 @@ Safe_Code_Executor/
 ---
 
  ### Architecture
+---
 ![all](app/outputs/arch.png)
 
 
@@ -122,7 +123,7 @@ Safe_Code_Executor/
 
 ---
 
-## **1️ Clone the Project**
+## **1️. Clone the Project**
 
 ```bash
 git clone <your_repo_url>
@@ -137,7 +138,7 @@ Cloning into 'Safe_Code_Executor'...
 
 ---
 
-## **2️ Create & Activate Virtual Environment**
+## **2️. Create & Activate Virtual Environment**
 
 ```bash
 python3 -m venv venv
@@ -152,7 +153,7 @@ source venv/bin/activate
 ![env](app/outputs/env.png)
 ---
 
-## **3️ Install Dependencies**
+## **3️. Install Dependencies**
 
 ```bash
 pip install -r requirements.txt
@@ -166,7 +167,7 @@ Successfully installed flask ...
 ![flask](app/outputs/flask.png)
 ---
 
-## **4️ Start Docker Daemon**
+## **4️. Start Docker Daemon**
 
 Open **Docker Desktop** → Wait for "Docker is running".
 
@@ -178,7 +179,7 @@ docker run hello-world
 
 ---
 
-## **5️ Run the Flask Server**
+## **5️. Run the Flask Server**
 
 ```bash
 python3 app/main.py
@@ -191,7 +192,7 @@ python3 app/main.py
 
 ---
 
-## **6️ Health Check**
+## **6️. Health Check**
 
 ```bash
 curl http://127.0.0.1:5000/
@@ -205,7 +206,7 @@ Safe Code Executor API is running!
 ![all](app/outputs/flask,conn.png)
 ---
 
-## **7️ Run Python Code**
+## **7️. Run Python Code**
 
 ```bash
 curl -X POST http://127.0.0.1:5000/run \
@@ -222,7 +223,7 @@ Expected:
 
 ---
 
-## **8️ Run JavaScript Code**
+## **8️. Run JavaScript Code**
 
 ```bash
 curl -X POST http://127.0.0.1:5000/run \
@@ -242,7 +243,7 @@ Expected:
 
 ---
 
-## **9️ Infinite Loop (Timeout)**
+## **9️. Infinite Loop (Timeout)**
 
 ```bash
 curl -X POST http://127.0.0.1:5000/run \
@@ -256,9 +257,10 @@ Expected:
 {"error":"Execution timed out after 10 seconds.","exit_code":-2}
 ```
 ![all](app/outputs/all.png)
+
 ---
 
-## **10 Memory Limit Test**
+## **10. Memory Limit Test**
 
 ```bash
 curl -X POST http://127.0.0.1:5000/run \
@@ -277,7 +279,7 @@ Expected:
 
 ---
 
-## **1️1️ Network Block**
+## **1️1️. Network Block**
 
 ```bash
 curl -X POST http://127.0.0.1:5000/run \
@@ -290,7 +292,7 @@ Expected: DNS/network failure (no internet inside container).
 ![all](app/outputs/api_url.png)
 ---
 
-## **1️2️ Read-Only Filesystem**
+## **1️2️. Read-Only Filesystem**
 
 ```bash
 curl -X POST http://127.0.0.1:5000/run \
@@ -307,7 +309,7 @@ OSError: [Errno 30] Read-only file system
 
 ---
 
-## **1️3️ Code Length Limit**
+## **1️3️. Code Length Limit**
 
 Send >5000 characters.
 
@@ -339,16 +341,7 @@ Features:
 ```
 ---
 
-#  Execution History
 
-Get last 10 executions:
-
-```bash
-curl http://127.0.0.1:5000/history
-```
- 
-![javascript](app/outputs/history.png)
----
 
 # **10. Bonus Features Implemented**
 
@@ -557,31 +550,39 @@ OSError: [Errno 30] Read-only file system
 
 
 #  What I Learned
+#  Final Learning Reflection 
 
-### **Docker Security**
+### **Understanding untrusted code**
 
-* Container isolation
-* Memory/CPU limits
-* No-network execution
-* Read-only root filesystems
+I learned that user code can cause loops, memory crashes, or unsafe actions, so it must run in a safe environment.
 
-### **Safe Code Execution Design**
+### **Using Docker for isolation**
 
-* Prevent infinite loops
-* Prevent memory abuse
-* Prevent file writes
-* Prevent network misuse
+Docker helped me understand how containers isolate code using memory limits, no-network mode, and read-only filesystems.
 
-### **Backend Development**
+### **Layered safety approach**
 
-* REST API design (`/run`, `/history`, `/ui`)
-* JSON-based responses
-* Error handling
+I learned that real security needs multiple checks like timeouts, memory limits, input limits, and controlled file access.
 
-### **Frontend Integration**
+### **Supporting multiple languages**
 
-* HTML UI with textarea & live output
-* Simple, practical developer tool
+Adding Node.js showed me how to design an executor that works for more than one programming language.
+
+### **Running code in parallel**
+
+I learned how to run multiple containers at the same time safely using Python’s ThreadPoolExecutor.
+
+### **Building a simple UI**
+
+Creating the UI helped me understand how to design a clean page for writing code and viewing output easily.
+
+### **Testing security features**
+
+I learned how to test timeout behavior, memory limits, blocked networks, and invalid inputs to confirm everything works correctly.
+
+### **Improving documentation**
+
+Writing the README and diagrams helped me explain how the system works in a clear and structured way.
 
 ---
 
