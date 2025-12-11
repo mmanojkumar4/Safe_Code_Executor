@@ -11,7 +11,7 @@ This guide shows **exactly how to run the project**, with **step-by-step instruc
 ---
 app/outputs/all.png
 
-![all](outputs/all.png)
+![all](app/outputs/all.png)
 
 ##  Project Structure
 
