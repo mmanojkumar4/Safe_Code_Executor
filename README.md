@@ -1,4 +1,4 @@
-
+<img width="1553" height="337" alt="etc" src="https://github.com/user-attachments/assets/5e700d29-7121-4e16-8c05-391602a79855" />
 # Safe Code Executor
 
 A secure Flask + Docker–based sandbox that runs **Python** and **JavaScript** code safely in isolated containers.
@@ -9,9 +9,8 @@ It enforces strict security controls—timeout, memory limits, no network, and r
 This guide shows **exactly how to run the project**, with **step-by-step instructions**, **command examples**, and **expected output** for every step.
 
 ---
-app/outputs/all.png
 
-![all](app/outputs/all.png)
+
 
 ##  Project Structure
 
@@ -54,6 +53,8 @@ Safe_Code_Executor/
 * Language selector
 * Sends `{ language, code }` to backend
 * Displays output / errors
+
+![all](app/outputs/firstui.png)
 
 ### **2️.Flask API**
 
@@ -181,6 +182,7 @@ docker run hello-world
 ```bash
 python3 app/main.py
 ```
+![flask](app/outputs/helloo.png)
 
 ---
 
@@ -199,7 +201,7 @@ Expected:
 ```
 Safe Code Executor API is running!
 ```
-
+![all](app/outputs/flask,conn.png)
 ---
 
 ## **7️ Run Python Code**
@@ -215,6 +217,7 @@ Expected:
 ```json
 {"output":"4\n"}
 ```
+![all](app/outputs/py1.png)
 
 ---
 
@@ -251,7 +254,7 @@ Expected:
 ```json
 {"error":"Execution timed out after 10 seconds.","exit_code":-2}
 ```
-
+![all](app/outputs/all.png)
 ---
 
 ## **10 Memory Limit Test**
@@ -267,6 +270,7 @@ Expected:
 ```json
 {"error":"","exit_code":137}
 ```
+![all](app/outputs/memorylimit.png)
 
 ---
 
@@ -280,6 +284,7 @@ curl -X POST http://127.0.0.1:5000/run \
 
 Expected: DNS/network failure (no internet inside container).
 
+![all](app/outputs/api_url.png)
 ---
 
 ## **1️2️ Read-Only Filesystem**
@@ -295,6 +300,7 @@ Expected:
 ```
 OSError: [Errno 30] Read-only file system
 ```
+![all](app/outputs/tmphack.png)
 
 ---
 
@@ -307,6 +313,8 @@ Expected:
 ```json
 {"error":"Code too long. Maximum allowed length is 5000 characters."}
 ```
+
+![all](app/outputs/lengtherror.png)
 
 ---
 
@@ -356,6 +364,10 @@ curl http://127.0.0.1:5000/history
   ```
 * Same security flags as Python (timeout, memory limit, no network, read-only FS).
 
+![javascript](app/outputs/javascript.png)
+
+
+
 ---
 
 #### **2. UI Improvements**
@@ -365,6 +377,8 @@ curl http://127.0.0.1:5000/history
 * Output box redesigned.
 * Added **History panel** (fetches data from `/history`).
 * Added optional **“Run as Node”** behavior triggered by language selection.
+
+![UI](app/outputs/ui.png)
 
 ---
 
@@ -393,6 +407,8 @@ curl http://127.0.0.1:5000/history
   GET /history
   ```
 
+
+![history](app/outputs/history.png)
 ---
 
 
