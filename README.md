@@ -9,6 +9,9 @@ It enforces strict security controls—timeout, memory limits, no network, and r
 This guide shows **exactly how to run the project**, with **step-by-step instructions**, **command examples**, and **expected output** for every step.
 
 ---
+app/outputs/all.png
+
+![all](outputs/all.png)
 
 ##  Project Structure
 
