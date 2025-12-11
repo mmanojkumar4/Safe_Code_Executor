@@ -273,6 +273,8 @@ Expected:
 ```
 ![all](app/outputs/memory limit.png)
 
+app/outputs/memory limit.png
+
 ---
 
 ## **1️1️ Network Block**
