@@ -88,6 +88,9 @@ Safe_Code_Executor/
 * Stores last 10 runs in `history.json`
 * Accessible via `/history`
 
+![all](app/outputs/arch.png)
+
+
 ---
 
 ##  Execution Flow
@@ -144,7 +147,7 @@ source venv/bin/activate
 ```
 (venv)
 ```
-
+![env](app/outputs/env.png)
 ---
 
 ## **3️ Install Dependencies**
@@ -158,7 +161,7 @@ pip install -r requirements.txt
 ```
 Successfully installed flask ...
 ```
-
+![flask](app/outputs/flask.png)
 ---
 
 ## **4️ Start Docker Daemon**
