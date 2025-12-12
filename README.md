@@ -409,8 +409,90 @@ Features:
 ---
 
 
+#  **Medium-Level Features Implemented**
 
 
+### **1. ZIP Project Execution (Python & JavaScript)**
+
+The system supports executing complete projects packaged as a **.zip** file.
+
+✔ Automatically extracts ZIP in a secure temporary folder
+✔ Detects the entry file:
+
+* `main.py` → Python project
+* `index.js` → JavaScript project
+  ✔ Runs the entire project inside Docker (read-only, no network, memory limits)
+  ✔ Output displayed in UI
+  ✔ No need to open VS Code — upload and run directly from browser
+
+**Example ZIP structure (Python):**
+
+```
+main.py
+utils.py
+config.json
+```
+
+**Example ZIP structure (JavaScript):**
+
+```
+index.js
+helper.js
+data.json
+```
+
+---
+
+### **2. Syntax Highlighting (CodeMirror Integration)**
+
+The editor now uses **CodeMirror**, providing:
+
+ Line numbers
+Python / JavaScript syntax coloring
+Material theme
+Auto language switching
+Clean, developer-friendly interface
+
+This makes the UI feel like VS Code inside the browser.
+
+---
+
+### **3. Parallel Execution (Run 5 Containers at Once)**
+
+The backend uses a **ThreadPoolExecutor (max_workers=5)** to run multiple Docker executions simultaneously.
+
+Benefits:
+
+ Multiple users can run code at the same time
+ No blocking — each request gets its own container
+ Heavy tasks run in parallel safely
+Docker isolation remains intact
+
+**How parallel behavior was tested:**
+
+Run this code in 5 browser tabs:
+
+```python
+import time
+time.sleep(15)
+print("Done")
+```
+
+All tabs finished at **exactly 15 seconds**, proving real parallel execution.
+
+---
+
+### **Parallel Execution Debug Mode**
+
+During testing, we temporarily disabled Docker's auto-clean (`--rm`) to view running containers via:
+
+```bash
+docker ps
+```
+
+This confirmed that multiple containers execute simultaneously.
+
+---
 #  Security Features Implemented
 
 * Timeout (10 seconds)
