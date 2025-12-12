@@ -412,7 +412,7 @@ Features:
 #  **Medium-Level Features Implemented**
 
 
-### **1. ZIP Project Execution (Python & JavaScript)**
+# **1. ZIP Project Execution (Python & JavaScript)**
 
 The system supports executing complete projects packaged as a **.zip** file.
 * **Material theme** for a clean dark UI
