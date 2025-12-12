@@ -425,6 +425,9 @@ The system supports executing complete projects packaged as a **.zip** file.
 * Output displayed in UI
 * No need to open VS Code — upload and run directly from browser
 
+![all](app/outputs/zip1.png)
+
+
 **Example ZIP structure (Python):**
 
 ```
@@ -440,6 +443,9 @@ index.js
 helper.js
 data.json
 ```
+
+![all](app/outputs/zip2.png)
+
 
 ---
 
@@ -457,6 +463,8 @@ The editor now uses **CodeMirror**, providing:
 
 This makes the UI feel like VS Code inside the browser.
 
+![all](app/outputs/m1.png)
+
 
 ---
 
@@ -470,6 +478,9 @@ Benefits:
  * No blocking — each request gets its own container
  * Heavy tasks run in parallel safely
  * Docker isolation remains intact
+
+![all](app/outputs/parallel2.png)
+
 
 **How parallel behavior was tested:**
 
@@ -492,6 +503,8 @@ During testing, we temporarily disabled Docker's auto-clean (`--rm`) to view run
 ```bash
 docker ps
 ```
+
+![all](app/outputs/parallel.png)
 
 This confirmed that multiple containers execute simultaneously.
 
@@ -604,6 +617,7 @@ Container’s internal `/etc/passwd` is printed — safe.
 
 
 ![javascript](app/outputs/etc.png)
+
 ---
 
 ### **2. Write Before `--read-only`**
@@ -629,11 +643,12 @@ OSError: [Errno 30] Read-only file system
 * Only sees container’s filesystem.
 
 ---
+#  FINAL USER INTERFACE WITH ALL FEATURES
+
+![javascript](app/outputs/UII.png)
 
 
-
-
-
+---
 #  What I Learned
 #  Final Learning Reflection 
 
