@@ -641,7 +641,81 @@ OSError: [Errno 30] Read-only file system
 
 * Container cannot access host files.
 * Only sees container’s filesystem.
+---
 
+
+Got you bro — here are **VERY short, single tests**, one test per medium feature.
+Clean, simple, and perfect for your README.
+
+---
+
+# ## **Medium Feature Demonstration Tests**
+
+### **1. ZIP Project Execution — Test**
+
+Upload a ZIP file containing only:
+
+```
+main.py
+```
+
+With code:
+
+```python
+print("ZIP working!")
+```
+
+**Expected Output:**
+
+```
+ZIP working!
+```
+
+* Confirms Python ZIP extraction + execution works.
+
+---
+
+### **2. Syntax Highlighting — Test**
+
+Select **Python** and paste:
+
+```python
+for i in range(3):
+    print(i)
+```
+
+**Expected:**
+
+* Line numbers appear
+* Keywords (`for`, `in`, `print`) show syntax colors
+* Editor theme switches correctly
+
+* Confirms CodeMirror highlighting works.
+
+---
+
+### **3. Parallel Execution — Test**
+
+Open **5 browser tabs** of `/ui`.
+
+In each tab run:
+
+```python
+import time
+time.sleep(5)
+print("Done")
+```
+
+Run all tabs within 5 seconds.
+
+**Expected:**
+All 5 tabs print **Done** at ~5 seconds (same time).
+
+* Confirms multiple Docker containers run in parallel.
+
+
+
+---
 ---
 #  FINAL USER INTERFACE WITH ALL FEATURES
 
