@@ -415,15 +415,15 @@ Features:
 ### **1. ZIP Project Execution (Python & JavaScript)**
 
 The system supports executing complete projects packaged as a **.zip** file.
-
-✔ Automatically extracts ZIP in a secure temporary folder
-✔ Detects the entry file:
+* **Material theme** for a clean dark UI
+* Automatically extracts ZIP in a secure temporary folder
+* Detects the entry file:
 
 * `main.py` → Python project
 * `index.js` → JavaScript project
-  ✔ Runs the entire project inside Docker (read-only, no network, memory limits)
-  ✔ Output displayed in UI
-  ✔ No need to open VS Code — upload and run directly from browser
+* Runs the entire project inside Docker (read-only, no network, memory limits)
+* Output displayed in UI
+* No need to open VS Code — upload and run directly from browser
 
 **Example ZIP structure (Python):**
 
@@ -447,13 +447,16 @@ data.json
 
 The editor now uses **CodeMirror**, providing:
 
- Line numbers
-Python / JavaScript syntax coloring
-Material theme
-Auto language switching
-Clean, developer-friendly interface
+ * **Line numbers** for easier debugging
+* **Python & JavaScript syntax colors**
+* **Material theme** for a clean dark UI
+* **Automatic language switching** (Python ↔ JavaScript)
+* **Smooth typing and scrolling experience**
+* **Better readability than a normal `<textarea>`**
+* **Safe, isolated editor — no client-side execution**
 
 This makes the UI feel like VS Code inside the browser.
+
 
 ---
 
@@ -463,10 +466,10 @@ The backend uses a **ThreadPoolExecutor (max_workers=5)** to run multiple Docker
 
 Benefits:
 
- Multiple users can run code at the same time
- No blocking — each request gets its own container
- Heavy tasks run in parallel safely
-Docker isolation remains intact
+ * Multiple users can run code at the same time
+ * No blocking — each request gets its own container
+ * Heavy tasks run in parallel safely
+ * Docker isolation remains intact
 
 **How parallel behavior was tested:**
 
