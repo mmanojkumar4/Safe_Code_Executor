@@ -1,138 +1,135 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Safe Code Executor</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f7fa;
-            padding: 40px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            width: 800px;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        textarea {
-            width: 100%;
-            height: 200px;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 15px;
-            font-family: Consolas, monospace;
-            resize: vertical;
-            background: #fafafa;
-        }
-
-        select {
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            margin-top: 10px;
-        }
-
-        .buttons {
-            margin-top: 15px;
-            display: flex;
-            gap: 12px;
-        }
-
-        button {
-            padding: 10px 18px;
-            border: none;
-            border-radius: 6px;
-            font-size: 15px;
-            cursor: pointer;
-            color: white;
-        }
-
-        #runBtn {
-            background-color: #4CAF50;
-        }
-
-        #clearBtn {
-            background-color: #f44336;
-        }
-
-        .output-box {
-            margin-top: 20px;
-            padding: 12px;
-            background: #1e1e1e;
-            color: #00ff62;
-            border-radius: 8px;
-            height: 180px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            font-family: Consolas, monospace;
-            font-size: 14px;
-        }
+        body { font-family: Arial; margin: 20px; display: flex; gap: 20px; }
+        #editorContainer { width: 70%; }
+        #historyPanel { width: 25%; padding: 10px; border: 1px solid #ccc; height: 600px; overflow-y: auto; }
+        #output { white-space: pre-wrap; border: 1px solid #aaa; padding: 10px; height: 150px; overflow-y: auto; }
+        #zipForm { margin-top: 20px; }
     </style>
+
+    <!-- CodeMirror CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.13/lib/codemirror.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.13/theme/material.css">
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.13/lib/codemirror.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.13/mode/python/python.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.13/mode/javascript/javascript.js"></script>
+
 </head>
+
 <body>
 
-<div class="container">
-    <h2>Safe Code Executor</h2>
+    <div id="editorContainer">
+        <h2>Safe Code Executor</h2>
 
-    <label>Write your code:</label>
-    <textarea id="code" placeholder="print('Hello')"></textarea>
+        Language:
+        <select id="language">
+            <option value="python">Python</option>
+            <option value="javascript">JavaScript</option>
+        </select>
 
-    <br>
+        <textarea id="code" style="display:none;">print("Hello")</textarea>
+        <div id="editor" style="height:300px;border:1px solid #ccc;"></div>
 
-    <label>Select language:</label>
-    <select id="language">
-        <option value="python">Python</option>
-        <option value="javascript">JavaScript</option>
-    </select>
-
-    <div class="buttons">
         <button id="runBtn">Run</button>
         <button id="clearBtn">Clear</button>
+
+        <h3>Output:</h3>
+        <div id="output"></div>
+
+        <hr>
+
+        <h3>Run ZIP Project</h3>
+        <form id="zipForm">
+            <input type="file" id="zipFile" accept=".zip">
+            <button type="button" id="uploadZipBtn">Run ZIP</button>
+        </form>
     </div>
 
-    <h3>Output:</h3>
-    <div id="output" class="output-box"></div>
-</div>
+    <div id="historyPanel">
+        <h3>History</h3>
+        <div id="historyList"></div>
+    </div>
 
 <script>
+    // Initialize CodeMirror
+    var textarea = document.getElementById("code");
+    var editor = CodeMirror(document.getElementById("editor"), {
+        value: textarea.value,
+        mode: "python",
+        theme: "material",
+        lineNumbers: true
+    });
+
+    // Switch syntax mode
+    document.getElementById("language").onchange = function(){
+        editor.setOption("mode", this.value === "javascript" ? "javascript" : "python");
+    };
+
+    // Run code
     document.getElementById("runBtn").onclick = async () => {
-        const code = document.getElementById("code").value;
-        const lang = document.getElementById("language").value;
+        const code = editor.getValue();
+        const language = document.getElementById("language").value;
 
         const response = await fetch("/run", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({language: lang, code: code})
+            body: JSON.stringify({language, code})
         });
 
         const result = await response.json();
 
-        const outputBox = document.getElementById("output");
+        // Correct output handling
+        document.getElementById("output").innerText =
+            result.stdout ? result.stdout :
+            result.stderr ? ("Error:\n" + result.stderr) :
+            "Unknown error";
 
-        if (result.output) {
-            outputBox.innerText = result.output;
-        } else {
-            outputBox.innerText = "Error:\n" + result.error;
-        }
+        loadHistory();
     };
 
+    // Clear editor
     document.getElementById("clearBtn").onclick = () => {
-        document.getElementById("code").value = "";
+        editor.setValue("");
         document.getElementById("output").innerText = "";
     };
+
+    // ZIP upload
+    document.getElementById("uploadZipBtn").onclick = async () => {
+        const file = document.getElementById("zipFile").files[0];
+        if (!file) return alert("Choose a ZIP file!");
+
+        const fd = new FormData();
+        fd.append("file", file);
+
+        const res = await fetch("/run-zip", { method: "POST", body: fd });
+        const out = await res.json();
+
+        document.getElementById("output").innerText =
+            out.stdout ? out.stdout :
+            out.stderr ? ("Error:\n" + out.stderr) :
+            "Unknown error";
+
+        loadHistory();
+    };
+
+    // Load history
+    async function loadHistory(){
+        const res = await fetch("/history");
+        const list = await res.json();
+        const div = document.getElementById("historyList");
+
+        div.innerHTML = "";
+        list.forEach(h => {
+            div.innerHTML += `<div style="margin-bottom:10px;">
+                📝 <b>${h.language}</b><br>${h.code}
+            </div>`;
+        });
+    }
+
+    loadHistory();
 </script>
 
 </body>
