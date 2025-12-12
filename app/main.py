@@ -1,116 +1,122 @@
-import sys, os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from flask import Flask, request, jsonify, render_template
-from executor import run_code_in_docker
+import os
 import json
-import datetime
-
-# ---------- FIX: ABSOLUTE HISTORY FILE PATH ----------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))   # /path/to/app
-HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
-print("Using history file at:", HISTORY_FILE)
-
+import tempfile
+import zipfile
+from flask import Flask, request, jsonify, render_template
+from executor import run_python_in_docker, run_js_in_docker, run_python_zip, run_js_zip
 
 app = Flask(__name__)
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
 
-# ---------- Helper: Save Execution History ----------
+# Create history file if missing
+if not os.path.exists(HISTORY_FILE):
+    with open(HISTORY_FILE, "w") as f:
+        json.dump([], f)
+
+print("Using history file:", HISTORY_FILE)
+
 def save_history(entry):
-    """Save execution entry to history.json (max 10 entries)."""
-    try:
-        # Load existing history
-        if os.path.exists(HISTORY_FILE):
-            with open(HISTORY_FILE, "r") as f:
-                history = json.load(f)
-        else:
-            history = []
+    """ Save last 10 executions """
+    with open(HISTORY_FILE, "r") as f:
+        history = json.load(f)
 
-        # Add new entry
-        history.append(entry)
+    history.insert(0, entry)
+    history = history[:10]
 
-        # Keep only last 10 entries
-        history = history[-10:]
+    with open(HISTORY_FILE, "w") as f:
+        json.dump(history, f, indent=4)
 
-        # Save back to file
-        with open(HISTORY_FILE, "w") as f:
-            json.dump(history, f, indent=4)
-
-    except Exception as e:
-        print("History save error:", e)
-
-
-# ---------- Routes ----------
 
 @app.route("/")
 def home():
-    return "Safe Code Executor API is running!", 200
+    return "Safe Code Executor API is running!"
 
 
 @app.route("/ui")
-def ui_page():
+def ui():
     return render_template("index.html")
 
 
 @app.route("/run", methods=["POST"])
 def run_code():
-    data = request.get_json(silent=True)
+    data = request.get_json()
 
     if not data or "code" not in data:
         return jsonify({"error": "Missing 'code' field"}), 400
 
-    # Language (default = python)
-    language = data.get("language", "python").lower()
     code = data["code"]
+    language = data.get("language", "python")
 
-    # Code length limit
+    # Length check
     if len(code) > 5000:
-        return jsonify({
-            "error": "Code too long. Maximum allowed length is 5000 characters."
-        }), 400
+        return jsonify({"error": "Code too long. Max 5000 chars."}), 400
 
-    # Supported languages
-    if language not in ["python", "javascript", "js"]:
-        return jsonify({"error": f"Unsupported language: {language}"}), 400
+    if language == "python":
+        result = run_python_in_docker(code)
+    elif language == "javascript":
+        result = run_js_in_docker(code)
+    else:
+        return jsonify({"error": "Unsupported language"}), 400
 
-    # Execute in Docker
-    result = run_code_in_docker(language, code)
-
-    # Prepare history entry
-    history_entry = {
+    # Save to history
+    save_history({
         "language": language,
-        "code": code,
-        "output": result["stdout"],
-        "error": result["stderr"],
-        "exit_code": result["exit_code"],
-        "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
+        "code": code[:120],
+        "output": result.get("output", ""),
+        "error": result.get("error", ""),
+        "exit_code": result.get("exit_code", 0),
+        "time": ""
+    })
 
-    # Save history
-    save_history(history_entry)
+    return jsonify(result)
 
-    # Return result
-    if result["exit_code"] == 0:
-        return jsonify({"output": result["stdout"]}), 200
+
+@app.route("/history")
+def history():
+    with open(HISTORY_FILE, "r") as f:
+        return jsonify(json.load(f))
+
+
+# ------------------------------------------------------------
+# ZIP EXECUTION SUPPORT
+# ------------------------------------------------------------
+@app.route("/run-zip", methods=["POST"])
+def run_zip_project():
+    if "file" not in request.files:
+        return jsonify({"stderr": "No ZIP file uploaded", "stdout": ""}), 400
+
+    file = request.files["file"]
+
+    if not file.filename.endswith(".zip"):
+        return jsonify({"stderr": "File must be a ZIP", "stdout": ""}), 400
+
+    # Create temp folder
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, "project.zip")
+    file.save(zip_path)
+
+    # Extract
+    try:
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+            zip_ref.extractall(temp_dir)
+    except:
+        return jsonify({"stderr": "Invalid ZIP structure", "stdout": ""}), 400
+
+    # Detect entry file
+    entry_py = os.path.join(temp_dir, "main.py")
+    entry_js = os.path.join(temp_dir, "index.js")
+
+    if os.path.exists(entry_py):
+        result = run_python_zip(temp_dir)
+    elif os.path.exists(entry_js):
+        result = run_js_zip(temp_dir)
     else:
-        return jsonify({
-            "error": result["stderr"] or "Execution failed.",
-            "exit_code": result["exit_code"]
-        }), 400
+        return jsonify({"stderr": "ZIP must contain main.py or index.js", "stdout": ""}), 400
+
+    return jsonify(result)
 
 
-@app.route("/history", methods=["GET"])
-def get_history():
-    """Return last 10 executions."""
-    if os.path.exists(HISTORY_FILE):
-        with open(HISTORY_FILE, "r") as f:
-            history = json.load(f)
-    else:
-        history = []
-
-    return jsonify(history), 200
-
-
-# ---------- Run Server ----------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
