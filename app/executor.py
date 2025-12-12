@@ -1,60 +1,20 @@
 import subprocess
-import os
 import tempfile
-import shutil
+import os
+import json
 
-def run_code_in_docker(language, code):
-    
 
-    #  Create temp directory + code file
-    temp_dir = tempfile.mkdtemp()
-
-    if language == "python":
-        filename = "script.py"
-        image = "python:3.11-slim"
-        run_cmd = ["python", f"/app/{filename}"]
-
-    elif language in ["javascript", "js"]:
-        filename = "script.js"
-        image = "node:18-slim"
-        run_cmd = ["node", f"/app/{filename}"]
-
-    else:
-        return {
-            "stdout": "",
-            "stderr": "Unsupported language",
-            "exit_code": -1
-        }
-
-    script_path = os.path.join(temp_dir, filename)
-
-    # Write user code to file
-    with open(script_path, "w") as f:
-        f.write(code)
-
-    #  Docker run command with full sandboxing
-    command = [
-        "docker", "run", "--rm",
-
-        # Security limits
-        "--memory=128m",
-        "--memory-swap=128m",
-        "--network", "none",
-        "--read-only",
-
-        # Mount script file (read-only)
-        "-v", f"{script_path}:/app/{filename}:ro",
-
-        image
-    ] + run_cmd
-
+# ---------------------------------------------------
+# Helper to run commands safely
+# ---------------------------------------------------
+def run_command_safe(cmd):
     try:
-        #  Execute inside Docker with timeout
         result = subprocess.run(
-            command,
-            capture_output=True,
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            timeout=10
+            timeout=10  # 10 second timeout
         )
 
         return {
@@ -70,16 +30,80 @@ def run_code_in_docker(language, code):
             "exit_code": -2
         }
 
-    except Exception as e:
-        return {
-            "stdout": "",
-            "stderr": f"Internal error: {str(e)}",
-            "exit_code": -1
-        }
 
-    finally:
-        # Cleanup temporary directory
-        try:
-            shutil.rmtree(temp_dir)
-        except:
-            pass
+# ---------------------------------------------------
+# Run Python code inside Secure Docker
+# ---------------------------------------------------
+def run_python_in_docker(code):
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as tmp:
+        tmp.write(code.encode())
+        tmp.flush()
+
+    cmd = [
+        "docker", "run",
+        "--rm",
+        "--network", "none",
+        "--read-only",
+        "--memory=128m",
+        "-v", f"{tmp.name}:/app/script.py:ro",
+        "python:3.11-slim",
+        "python", "/app/script.py"
+    ]
+
+    return run_command_safe(cmd)
+
+
+# ---------------------------------------------------
+# Run JavaScript code inside Secure Docker
+# ---------------------------------------------------
+def run_js_in_docker(code):
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".js") as tmp:
+        tmp.write(code.encode())
+        tmp.flush()
+
+    cmd = [
+        "docker", "run",
+        "--rm",
+        "--network", "none",
+        "--read-only",
+        "--memory=128m",
+        "-v", f"{tmp.name}:/app/script.js:ro",
+        "node:18-slim",
+        "node", "/app/script.js"
+    ]
+
+    return run_command_safe(cmd)
+
+
+# ---------------------------------------------------
+# Run Python ZIP project
+# ---------------------------------------------------
+def run_python_zip(folder_path):
+    cmd = [
+        "docker", "run",
+        "--rm",
+        "--network", "none",
+        "--read-only",
+        "--memory=256m",
+        "-v", f"{folder_path}:/app:ro",
+        "python:3.11-slim",
+        "python", "/app/main.py"
+    ]
+    return run_command_safe(cmd)
+
+
+# ---------------------------------------------------
+# Run JavaScript ZIP project
+# ---------------------------------------------------
+def run_js_zip(folder_path):
+    cmd = [
+        "docker", "run",
+        "--rm",
+        "--network", "none",
+        "--read-only",
+        "--memory=256m",
+        "-v", f"{folder_path}:/app:ro",
+        "node:18-slim",
+        "node", "/app/index.js"
+    ]
+    return run_command_safe(cmd)
